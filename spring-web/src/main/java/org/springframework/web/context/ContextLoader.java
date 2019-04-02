@@ -293,9 +293,11 @@ public class ContextLoader {
 						cwac.setParent(parent);
 					}
 					//刷新  就是配置一些东东
+					//跟contextLoad里面的刷新配置是相同的
 					configureAndRefreshWebApplicationContext(cwac, servletContext);
 				}
 			}
+			//ServletContext把 WebApplicationContext 放进去
 			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.context);
 
 			ClassLoader ccl = Thread.currentThread().getContextClassLoader();
