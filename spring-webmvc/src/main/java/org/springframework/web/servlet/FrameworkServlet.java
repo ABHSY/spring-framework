@@ -139,6 +139,7 @@ import org.springframework.web.util.WebUtils;
  * @see #setNamespace
  */
 @SuppressWarnings("serial")
+//FrameworkServlet ，负责初始化 Spring Servlet WebApplicationContext 容器
 public abstract class FrameworkServlet extends HttpServletBean implements ApplicationContextAware {
 
 	/**

@@ -134,11 +134,13 @@ public class ContextLoader {
 
 	private static final Properties defaultStrategies;
 
+	//用于初始化默认的properties文件
 	static {
 		// Load default strategy implementations from properties file.
 		// This is currently strictly internal and not meant to be customized
 		// by application developers.
 		try {
+			//ContextLoader.properties拿到这个 XmlWebApplicationContext  clazzName
 			ClassPathResource resource = new ClassPathResource(DEFAULT_STRATEGIES_PATH, ContextLoader.class);
 			defaultStrategies = PropertiesLoaderUtils.loadProperties(resource);
 		}
@@ -275,8 +277,10 @@ public class ContextLoader {
 			// Store context in local instance variable, to guarantee that
 			// it is available on ServletContext shutdown.
 			if (this.context == null) {
+				//创建 WebApplicationContext
 				this.context = createWebApplicationContext(servletContext);
 			}
+			//如果是新的context肯定是 ConfigurableWebApplicationContext
 			if (this.context instanceof ConfigurableWebApplicationContext) {
 				ConfigurableWebApplicationContext cwac = (ConfigurableWebApplicationContext) this.context;
 				if (!cwac.isActive()) {
@@ -288,6 +292,7 @@ public class ContextLoader {
 						ApplicationContext parent = loadParentContext(servletContext);
 						cwac.setParent(parent);
 					}
+					//刷新  就是配置一些东东
 					configureAndRefreshWebApplicationContext(cwac, servletContext);
 				}
 			}
@@ -328,11 +333,14 @@ public class ContextLoader {
 	 * @see ConfigurableWebApplicationContext
 	 */
 	protected WebApplicationContext createWebApplicationContext(ServletContext sc) {
+		//获得context
 		Class<?> contextClass = determineContextClass(sc);
+        //ConfigurableWebApplicationContext  类型
 		if (!ConfigurableWebApplicationContext.class.isAssignableFrom(contextClass)) {
 			throw new ApplicationContextException("Custom context class [" + contextClass.getName() +
 					"] is not of type [" + ConfigurableWebApplicationContext.class.getName() + "]");
 		}
+		//如果是ConfigurableWebApplicationContext  实例化
 		return (ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
 	}
 
@@ -345,6 +353,7 @@ public class ContextLoader {
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
 	protected Class<?> determineContextClass(ServletContext servletContext) {
+		//拿到contextClass
 		String contextClassName = servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
 		if (contextClassName != null) {
 			try {
@@ -356,6 +365,7 @@ public class ContextLoader {
 			}
 		}
 		else {
+			//static 代码块的时候已经初始化好了
 			contextClassName = defaultStrategies.getProperty(WebApplicationContext.class.getName());
 			try {
 				return ClassUtils.forName(contextClassName, ContextLoader.class.getClassLoader());
@@ -368,6 +378,7 @@ public class ContextLoader {
 	}
 
 	protected void configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext wac, ServletContext sc) {
+		//如果 wac 使用了默认编号，则重新设置 id 属性
 		if (ObjectUtils.identityToString(wac).equals(wac.getId())) {
 			// The application context id is still set to its original default value
 			// -> assign a more useful id based on available information
@@ -376,6 +387,7 @@ public class ContextLoader {
 				wac.setId(idParam);
 			}
 			else {
+				//自动生成
 				// Generate default id...
 				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
 						ObjectUtils.getDisplayString(sc.getContextPath()));
@@ -388,6 +400,9 @@ public class ContextLoader {
 			wac.setConfigLocation(configLocationParam);
 		}
 
+//		在任何情况下，当上下文被调用时，wac环境的#initPropertySources都会被调用
+//				刷新;在这里急切地确保servlet属性源是合适的吗
+//		用于#refresh之前发生的任何后处理或初始化
 		// The wac environment's #initPropertySources will be called in any case when the context
 		// is refreshed; do it eagerly here to ensure servlet property sources are in place for
 		// use in any post-processing or initialization that occurs below prior to #refresh
@@ -487,7 +502,7 @@ public class ContextLoader {
 	/**
 	 * Template method with default implementation (which may be overridden by a
 	 * subclass), to load or obtain an ApplicationContext instance which will be
-	 * used as the parent context of the root WebApplicationContext. If the
+	 * used as t0he parent context of the root WebApplicationContext. If the
 	 * return value from the method is null, no parent context is set.
 	 * <p>The main reason to load a parent context here is to allow multiple root
 	 * web application contexts to all be children of a shared EAR context, or

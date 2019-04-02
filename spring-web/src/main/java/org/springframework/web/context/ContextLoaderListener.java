@@ -34,6 +34,8 @@ import javax.servlet.ServletContextListener;
  * @see #setContextInitializers
  * @see org.springframework.web.WebApplicationInitializer
  */
+//spring容器的入口
+//	ServletContextListener  监听容器的启动  销毁
 public class ContextLoaderListener extends ContextLoader implements ServletContextListener {
 
 	/**
@@ -109,6 +111,7 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	 */
 	@Override
 	public void contextDestroyed(ServletContextEvent event) {
+		//关闭 WebApplicationContext
 		closeWebApplicationContext(event.getServletContext());
 		ContextCleanupListener.cleanupAttributes(event.getServletContext());
 	}

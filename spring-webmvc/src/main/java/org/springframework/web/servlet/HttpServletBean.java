@@ -79,6 +79,7 @@ import org.springframework.web.context.support.StandardServletEnvironment;
  * @see #doPost
  */
 @SuppressWarnings("serial")
+//负责将 ServletConfig 设置到当前 Servlet 对象中
 public abstract class HttpServletBean extends HttpServlet implements EnvironmentCapable, EnvironmentAware {
 
 	/** Logger available to subclasses. */
@@ -111,6 +112,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	 * {@code ConfigurableEnvironment}
 	 */
 	@Override
+	// 实现自 EnvironmentAware 接口，自动注入
 	public void setEnvironment(Environment environment) {
 		Assert.isInstanceOf(ConfigurableEnvironment.class, environment, "ConfigurableEnvironment required");
 		this.environment = (ConfigurableEnvironment) environment;
@@ -122,6 +124,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	 * {@link #createEnvironment()}.
 	 */
 	@Override
+	// 实现自 EnvironmentCapable 接口
 	public ConfigurableEnvironment getEnvironment() {
 		if (this.environment == null) {
 			this.environment = createEnvironment();
