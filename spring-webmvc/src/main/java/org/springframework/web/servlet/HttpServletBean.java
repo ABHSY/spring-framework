@@ -100,6 +100,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	 * driven by a ServletConfig instance.
 	 * @param property name of the required property
 	 */
+	//一个集合 所有的property
 	protected final void addRequiredProperty(String property) {
 		this.requiredProperties.add(property);
 	}
@@ -151,13 +152,27 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	public final void init() throws ServletException {
 
 		// Set bean properties from init parameters.
+//		解析 <init-param /> 标签，封装到 PropertyValues pvs 中
+		//xml指定的 spring-servlet.xml
 		PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 		if (!pvs.isEmpty()) {
 			try {
+//				将当前的这个 Servlet 对象，转化成一个 BeanWrapper 对象。
+//              从而能够以 Spring 的方式来将 pvs 注入到该 BeanWrapper 对象中
 				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 				ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
+//				注册自定义属性编辑器，一旦碰到 Resource 类型的属性，将会使用 ResourceEditor 进行解析
 				bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, getEnvironment()));
 				initBeanWrapper(bw);
+//				以 Spring 的方式来将 pvs 注入到该 BeanWrapper 对象中
+				//this 赋值给自己属性 查看xml文件内容 确定是会那个property
+				///WEB-INF/spring-servlet.xml
+				/**
+				 *     <init-param>
+				 		 <param-name>contextConfigLocation</param-name>
+						 <param-value>/WEB-INF/spring-servlet.xml</param-value>
+				 		</init-param>
+				 */
 				bw.setPropertyValues(pvs, true);
 			}
 			catch (BeansException ex) {
@@ -222,11 +237,12 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 
 			Set<String> missingProps = (!CollectionUtils.isEmpty(requiredProperties) ?
 					new HashSet<>(requiredProperties) : null);
-
+			//遍历 ServletConfig 的初始化参数集合，添加到 ServletConfigPropertyValues 中，并从 missingProps 移除
 			Enumeration<String> paramNames = config.getInitParameterNames();
 			while (paramNames.hasMoreElements()) {
 				String property = paramNames.nextElement();
 				Object value = config.getInitParameter(property);
+				// 添加到 ServletConfigPropertyValues 中
 				addPropertyValue(new PropertyValue(property, value));
 				if (missingProps != null) {
 					missingProps.remove(property);
