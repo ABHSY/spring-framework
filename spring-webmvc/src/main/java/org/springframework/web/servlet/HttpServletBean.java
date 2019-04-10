@@ -79,7 +79,8 @@ import org.springframework.web.context.support.StandardServletEnvironment;
  * @see #doPost
  */
 @SuppressWarnings("serial")
-//负责将 ServletConfig 设置到当前 Servlet 对象中
+//主要方法还是重写了  HttpServlet  init 方法
+//将 ServletConfig 设置到当前 Servlet 对象中
 public abstract class HttpServletBean extends HttpServlet implements EnvironmentCapable, EnvironmentAware {
 
 	/** Logger available to subclasses. */
@@ -163,6 +164,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 				ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
 //				注册自定义属性编辑器，一旦碰到 Resource 类型的属性，将会使用 ResourceEditor 进行解析
 				bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, getEnvironment()));
+				// <2.3> 空实现，留给子类覆盖
 				initBeanWrapper(bw);
 //				以 Spring 的方式来将 pvs 注入到该 BeanWrapper 对象中
 				//this 赋值给自己属性 查看xml文件内容 确定是会那个property
