@@ -75,6 +75,7 @@ import org.springframework.util.xml.XmlValidationModeDetector;
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
  * @see org.springframework.context.support.GenericApplicationContext
  */
+//XmlBeanDefinitionReader  顾明思意  加载BeanDefinition的加载器
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
