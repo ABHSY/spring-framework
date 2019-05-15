@@ -110,6 +110,7 @@ public interface MultipartResolver {
 	 * @see javax.servlet.http.HttpServletRequest#getParameterNames
 	 * @see javax.servlet.http.HttpServletRequest#getParameterMap
 	 */
+	//将 HttpServletRequest 请求封装成 MultipartHttpServletRequest 对象
 	MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException;
 
 	/**
@@ -117,6 +118,7 @@ public interface MultipartResolver {
 	 * like a storage for the uploaded files.
 	 * @param request the request to cleanup resources for
 	 */
+	//清理处理 multipart 产生的资源，例如临时文件
 	void cleanupMultipart(MultipartHttpServletRequest request);
 
 }

@@ -113,7 +113,13 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 
 	/**
 	 * Delegate the {@code ServletContext} to any {@link WebApplicationInitializer}
-	 * implementations present on the application classpath.
+	 * implementatio   1.一般有order by语句，在索引加得不当的情况下，都有可能出现Using filesort，这时候就要对SQL语句和索引进行优化了，但是，并不是说出现Using filesort就是个严重的问题，不是这样的，此次举的例子比较极端，几乎不太可能出现这么傻瓜的查询，优化和不优化，要看它是不是影响了业务性能。
+	    2. 从上面可以看到联合索引，也可以叫多列索引，形如 key ('A1','A2','A3' ,'A4')等的，排序的思路一般是，先按照A1来排序，A1相同，然后按照A2排序，以此类推，这样对于（A1）,(A1,A2),(A1,A2,A3)的索引都是有效的，但是对于（A2,A3）这样的索引就无效了。
+	 ---------------------
+	 作者：ClintNorthwood
+	 来源：CSDN
+	 原文：https://blog.csdn.net/yangyu112654374/article/details/4251624
+	 版权声明：本文为博主原创文章，转载请附上博文链接！ns present on the application classpath.
 	 * <p>Because this class declares @{@code HandlesTypes(WebApplicationInitializer.class)},
 	 * Servlet 3.0+ containers will automatically scan the classpath for implementations
 	 * of Spring's {@code WebApplicationInitializer} interface and provide the set of all
