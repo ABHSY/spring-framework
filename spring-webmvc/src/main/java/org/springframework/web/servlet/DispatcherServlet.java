@@ -873,14 +873,18 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	@SuppressWarnings("unchecked")
 	protected <T> List<T> getDefaultStrategies(ApplicationContext context, Class<T> strategyInterface) {
+		//获得 strategyInterface 对应的 value 值
 		String key = strategyInterface.getName();
+		//defaultStrategies  class
 		String value = defaultStrategies.getProperty(key);
 		if (value != null) {
+			//基于 "," 分隔，创建 classNames 数组
 			String[] classNames = StringUtils.commaDelimitedListToStringArray(value);
 			List<T> strategies = new ArrayList<>(classNames.length);
 			for (String className : classNames) {
 				try {
 					Class<?> clazz = ClassUtils.forName(className, DispatcherServlet.class.getClassLoader());
+					//创建 className 对应的类，并添加到 strategies 中
 					Object strategy = createDefaultStrategy(context, clazz);
 					strategies.add((T) strategy);
 				}

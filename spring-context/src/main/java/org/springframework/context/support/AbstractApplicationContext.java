@@ -18,6 +18,7 @@ package org.springframework.context.support;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -535,7 +536,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 				// Initialize message source for this context.
 				initMessageSource();
-
+				
 				// Initialize event multicaster for this context.
 				initApplicationEventMulticaster();
 

@@ -620,6 +620,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 				//当 Servlet WebApplicationContext 刷新完成后，触发 Spring MVC 组件的初始化
 				//组件的初始化
 				// initStrategies(context);
+				//onRefresh 会在DispatcherServlet中实现的
 				onRefresh(wac);
 			}
 		}
