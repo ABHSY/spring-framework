@@ -40,14 +40,20 @@ public class HandlerExecutionChain {
 
 	private static final Log logger = LogFactory.getLog(HandlerExecutionChain.class);
 
+	//处理器
 	private final Object handler;
 
+	//拦截器数组
 	@Nullable
 	private HandlerInterceptor[] interceptors;
 
+	//拦截器数组
+	//在实际使用时，会调用 {@link #getInterceptors()} 方法，初始化到 {@link #interceptors} 中
 	@Nullable
 	private List<HandlerInterceptor> interceptorList;
 
+	//已执行 {@link HandlerInterceptor#preHandle(HttpServletRequest, HttpServletResponse, Object)} 的位置
+	//主要用于实现 {@link #applyPostHandle(HttpServletRequest, HttpServletResponse, ModelAndView)} 的逻辑
 	private int interceptorIndex = -1;
 
 
@@ -69,8 +75,11 @@ public class HandlerExecutionChain {
 		if (handler instanceof HandlerExecutionChain) {
 			HandlerExecutionChain originalChain = (HandlerExecutionChain) handler;
 			this.handler = originalChain.getHandler();
+			// 初始化到 interceptorList 中
 			this.interceptorList = new ArrayList<>();
+			// 逻辑比较简单，就是将前者添加到后者中，即添加到 interceptorList 中
 			CollectionUtils.mergeArrayIntoCollection(originalChain.getInterceptors(), this.interceptorList);
+			// 逻辑比较简单，就是将前者添加到后者中，即添加到 interceptorList 中
 			CollectionUtils.mergeArrayIntoCollection(interceptors, this.interceptorList);
 		}
 		else {
@@ -125,10 +134,11 @@ public class HandlerExecutionChain {
 	/**
 	 * Apply preHandle methods of registered interceptors.
 	 * @return {@code true} if the execution chain should proceed with the
-	 * next interceptor or the handler itself. Else, DispatcherServlet assumes
+	 * next interceptor 	or the handler itself. Else, DispatcherServlet assumes
 	 * that this interceptor has already dealt with the response itself.
 	 */
 	boolean applyPreHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		//获得拦截器数组
 		HandlerInterceptor[] interceptors = getInterceptors();
 		if (!ObjectUtils.isEmpty(interceptors)) {
 			for (int i = 0; i < interceptors.length; i++) {
@@ -165,7 +175,7 @@ public class HandlerExecutionChain {
 	 */
 	void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response, @Nullable Exception ex)
 			throws Exception {
-
+		// 获得拦截器数组
 		HandlerInterceptor[] interceptors = getInterceptors();
 		if (!ObjectUtils.isEmpty(interceptors)) {
 			for (int i = this.interceptorIndex; i >= 0; i--) {

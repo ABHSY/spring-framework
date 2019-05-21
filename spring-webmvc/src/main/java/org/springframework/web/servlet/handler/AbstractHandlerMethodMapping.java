@@ -62,6 +62,8 @@ import org.springframework.web.servlet.HandlerMapping;
  * @param <T> the mapping for a {@link HandlerMethod} containing the conditions
  * needed to match the handler method to incoming request.
  */
+//实现 InitializingBean 接口，继承 AbstractHandlerMapping 抽象类，
+// 以 Method 作为 Handler 的 HandlerMapping 抽象类，提供 Mapping 的初始化、注册等通用的骨架方法
 public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMapping implements InitializingBean {
 
 	/**
@@ -91,9 +93,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	private boolean detectHandlerMethodsInAncestorContexts = false;
 
+	//Mapping 命名策略
+	//实现 RequestMappingInfoHandlerMethodMappingNamingStrategy
 	@Nullable
 	private HandlerMethodMappingNamingStrategy<T> namingStrategy;
 
+	//Mapping 注册表
+	//是 AbstractHandlerMethodMapping 的私有类，Mapping 注册表。
 	private final MappingRegistry mappingRegistry = new MappingRegistry();
 
 
@@ -319,10 +325,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @return the created HandlerMethod
 	 */
 	protected HandlerMethod createHandlerMethod(Object handler, Method method) {
+		//如果 handler 类型为 String， 说明对应一个 Bean 对象，
+		//例如 UserController 使用 @Controller 注解后，默认 handler 为它的 beanName ，即 `userController`
 		if (handler instanceof String) {
 			return new HandlerMethod((String) handler,
 					obtainApplicationContext().getAutowireCapableBeanFactory(), method);
 		}
+		//如果 handler 类型非 String ，说明是一个已经是一个 handler 对象，就无需处理，直接创建 HandlerMethod 对象
 		return new HandlerMethod(handler, method);
 	}
 
@@ -516,8 +525,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	class MappingRegistry {
 
+		//并 mapping + MappingRegistration 添加到 registry 中
 		private final Map<T, MappingRegistration<T>> registry = new HashMap<>();
 
+		//封装了映射关系  HandlerMethod { beanName  type method 都有}
 		private final Map<T, HandlerMethod> mappingLookup = new LinkedHashMap<>();
 
 		private final MultiValueMap<String, T> urlLookup = new LinkedMultiValueMap<>();
@@ -575,13 +586,17 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 
 		public void register(T mapping, Object handler, Method method) {
+			//获得写锁
 			this.readWriteLock.writeLock().lock();
 			try {
 				HandlerMethod handlerMethod = createHandlerMethod(handler, method);
+				//校验当前 mapping 不存在，否则抛出 IllegalStateException 异常
 				assertUniqueMethodMapping(handlerMethod, mapping);
+				//添加 mapping + HandlerMethod 到 mappingLookup 中
 				this.mappingLookup.put(mapping, handlerMethod);
-
+				//获得 mapping 对应的普通 URL 数组
 				List<String> directUrls = getDirectUrls(mapping);
+				//添加到 url + mapping 到 urlLookup 集合中
 				for (String url : directUrls) {
 					this.urlLookup.add(url, mapping);
 				}
@@ -589,6 +604,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				String name = null;
 				if (getNamingStrategy() != null) {
 					name = getNamingStrategy().getName(handlerMethod, mapping);
+					//添加到 mapping 的名字 + HandlerMethod 到 nameLookup 中
 					addMappingName(name, handlerMethod);
 				}
 
@@ -596,7 +612,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				if (corsConfig != null) {
 					this.corsLookup.put(handlerMethod, corsConfig);
 				}
-
+				// 创建 MappingRegistration 对象，并 mapping + MappingRegistration 添加到 registry 中
 				this.registry.put(mapping, new MappingRegistration<>(mapping, handlerMethod, directUrls, name));
 			}
 			finally {
@@ -625,17 +641,19 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 
 		private void addMappingName(String name, HandlerMethod handlerMethod) {
+			//获得 Mapping 的名字，对应的 HandlerMethod 数组
 			List<HandlerMethod> oldList = this.nameLookup.get(name);
 			if (oldList == null) {
 				oldList = Collections.emptyList();
 			}
 
+			//如果已经存在，则不用添加
 			for (HandlerMethod current : oldList) {
 				if (handlerMethod.equals(current)) {
 					return;
 				}
 			}
-
+			// 添加到 nameLookup 中
 			List<HandlerMethod> newList = new ArrayList<>(oldList.size() + 1);
 			newList.addAll(oldList);
 			newList.add(handlerMethod);
@@ -645,13 +663,15 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		public void unregister(T mapping) {
 			this.readWriteLock.writeLock().lock();
 			try {
+				// 从 registry 中移除
 				MappingRegistration<T> definition = this.registry.remove(mapping);
 				if (definition == null) {
 					return;
 				}
-
+				// 从 mappingLookup 中移除
 				this.mappingLookup.remove(definition.getMapping());
 
+				// 从 urlLookup 移除
 				for (String url : definition.getDirectUrls()) {
 					List<T> list = this.urlLookup.get(url);
 					if (list != null) {
@@ -661,9 +681,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 						}
 					}
 				}
-
+				// 从 nameLookup 移除
 				removeMappingName(definition);
-
+				// 从 corsLookup 中移除
 				this.corsLookup.remove(definition.getHandlerMethod());
 			}
 			finally {
