@@ -202,6 +202,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	@Override
 	public void afterPropertiesSet() {
+//		初始化处理器的方法们
 		initHandlerMethods();
 	}
 
@@ -212,11 +213,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @see #handlerMethodsInitialized
 	 */
 	protected void initHandlerMethods() {
+//		遍历 Bean ，逐个处理
 		for (String beanName : getCandidateBeanNames()) {
+//			处理 Bean
 			if (!beanName.startsWith(SCOPED_TARGET_NAME_PREFIX)) {
 				processCandidateBean(beanName);
 			}
 		}
+//		初始化处理器的方法们。目前是空方法，暂无具体的实现
 		handlerMethodsInitialized(getHandlerMethods());
 	}
 
@@ -244,6 +248,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @see #detectHandlerMethods
 	 */
 	protected void processCandidateBean(String beanName) {
+//		获得 Bean 对应的类型
 		Class<?> beanType = null;
 		try {
 			beanType = obtainApplicationContext().getType(beanName);
@@ -254,6 +259,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				logger.trace("Could not resolve type for bean '" + beanName + "'", ex);
 			}
 		}
+//		判断 Bean 是否为处理器，如果是，则扫描处理器方法
 		if (beanType != null && isHandler(beanType)) {
 			detectHandlerMethods(beanName);
 		}
@@ -265,11 +271,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @see #getMappingForMethod
 	 */
 	protected void detectHandlerMethods(Object handler) {
+		//获得处理器类型
 		Class<?> handlerType = (handler instanceof String ?
 				obtainApplicationContext().getType((String) handler) : handler.getClass());
 
 		if (handlerType != null) {
+			//获得真实的类。因为，handlerType 可能是代理类
 			Class<?> userType = ClassUtils.getUserClass(handlerType);
+			//获得匹配的方法的集合
 			Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
 					(MethodIntrospector.MetadataLookup<T>) method -> {
 						try {
@@ -283,6 +292,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			if (logger.isTraceEnabled()) {
 				logger.trace(formatMappings(userType, methods));
 			}
+			//遍历方法，逐个注册 HandlerMethod
 			methods.forEach((method, mapping) -> {
 				Method invocableMethod = AopUtils.selectInvocableMethod(method, userType);
 				registerHandlerMethod(handler, invocableMethod, mapping);
@@ -366,7 +376,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
 		this.mappingRegistry.acquireReadLock();
 		try {
+			//获得 HandlerMethod 对象
 			HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
+			//进一步，获得 HandlerMethod 对象
 			return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
 		}
 		finally {
@@ -395,10 +407,12 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			addMatchingMappings(this.mappingRegistry.getMappings().keySet(), matches, request);
 		}
 
+		//如果匹配到，则获取最佳匹配的 Match 对象的 handlerMethod 属性
 		if (!matches.isEmpty()) {
 			Comparator<Match> comparator = new MatchComparator(getMappingComparator(request));
 			matches.sort(comparator);
 			Match bestMatch = matches.get(0);
+			//处理存在多个 Match 对象的情况！！
 			if (matches.size() > 1) {
 				if (logger.isTraceEnabled()) {
 					logger.trace(matches.size() + " matching mappings: " + matches);
@@ -417,6 +431,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			}
 			request.setAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE, bestMatch.handlerMethod);
 			handleMatch(bestMatch.mapping, lookupPath, request);
+			//返回首个 Match 对象的 handlerMethod 属性
 			return bestMatch.handlerMethod;
 		}
 		else {
@@ -425,8 +440,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	private void addMatchingMappings(Collection<T> mappings, List<Match> matches, HttpServletRequest request) {
+		// 遍历 Mapping 数组
 		for (T mapping : mappings) {
 			T match = getMatchingMapping(mapping, request);
+			//如果匹配，则创建 Match 对象，添加到 matches 中
 			if (match != null) {
 				matches.add(new Match(match, this.mappingRegistry.getMappings().get(mapping)));
 			}
