@@ -1054,6 +1054,7 @@ public class DispatcherServlet extends FrameworkServlet {
 					}
 				}
 				//前置处理 拦截器
+				//HandlerInterceptor 的 preHandle 开始执行
 				if (!mappedHandler.applyPreHandle(processedRequest, response)) {
 					return;
 				}
@@ -1067,6 +1068,8 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 				//默认视图
 				applyDefaultViewName(processedRequest, mv);
+
+				//HandlerInterceptor 的 PostHandle 开始执行
 				mappedHandler.applyPostHandle(processedRequest, response, mv);
 			}
 			catch (Exception ex) {

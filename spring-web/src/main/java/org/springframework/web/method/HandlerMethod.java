@@ -187,7 +187,9 @@ public class HandlerMethod {
 
 	private MethodParameter[] initMethodParameters() {
 		int count = this.bridgedMethod.getParameterCount();
+		// 创建 MethodParameter 数组
 		MethodParameter[] result = new MethodParameter[count];
+		// 遍历 bridgedMethod 的参数，逐个解析参数类型
 		for (int i = 0; i < count; i++) {
 			HandlerMethodParameter parameter = new HandlerMethodParameter(i);
 			GenericTypeResolver.resolveParameterType(parameter, this.beanType);

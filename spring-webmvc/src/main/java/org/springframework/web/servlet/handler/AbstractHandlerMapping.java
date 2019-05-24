@@ -299,6 +299,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		//空方法。交给子类实现，用于注册自定义的拦截器到 interceptors 中。目前暂无子类实现。
 		extendInterceptors(this.interceptors);
 		//扫描已注册的 MappedInterceptor 的 Bean 们，添加到 mappedInterceptors 中
+		//HandlerInterceptorAdapter 这种拦截器是扫描不到的 。 就无法加载
+		//所以需要 新建一个类实现  WebMvcConfigurer or WebMvcConfigurerAdapter  接口在 addInterceptors 方法中添加进去
 		detectMappedInterceptors(this.adaptedInterceptors);
 		//将 interceptors 初始化成 HandlerInterceptor 类型，添加到 mappedInterceptors 中
 		initInterceptors();
@@ -422,6 +424,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@Nullable
 	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		//获得处理器。该方法是抽象方法，由子类实现
+		// 在eureka中的/测试中得到发现，会在这里拿到handler，也就是我们实现的control。
+		// 如果拿到handler 进去查看 -> AbstractHandlerMethodMapping  主要负责的就是初始化跟注册
 		Object handler = getHandlerInternal(request);
 		//获得不到，则使用默认处理器
 		if (handler == null) {
