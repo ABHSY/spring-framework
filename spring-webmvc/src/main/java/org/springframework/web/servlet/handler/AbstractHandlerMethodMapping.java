@@ -414,6 +414,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		//如果匹配到，则获取最佳匹配的 Match 对象的 handlerMethod 属性
 		if (!matches.isEmpty()) {
+			// 处，创建 MatchComparator 对象，排序 matches 结果。
+			// 其中 MatchComparator 实现 Comparator 接口，是 AbstractHandlerMethodMapping 的私有类，Match 排序器
 			Comparator<Match> comparator = new MatchComparator(getMappingComparator(request));
 			matches.sort(comparator);
 			Match bestMatch = matches.get(0);
